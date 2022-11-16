@@ -44,6 +44,7 @@ def parse_arguments():
         help='Language standard - to see them type\nclang(++) -std=blaj a.c')
 
     add('--source_file', required=True, help='Input file')
+    add('--out_dir', help='Where to save result')
 
     options = parser.parse_args()
     if options.define is None:
@@ -260,8 +261,12 @@ def main():
 
     save_file_name = os.path.basename(src_file)
     save_file_name += '.indx'
-    store_json_data(save_file_name, the_tree)
-    print(f'Output saved as {save_file_name}')
+    if False:
+        save_path = os.path.join(inputs.out_dir, save_file_name)
+    else:
+        save_path = save_file_name
+    store_json_data(save_path, the_tree)
+    print(f'Output saved as {save_path}')
     return 0
 
 #-------------------------------------------------------------------------------
