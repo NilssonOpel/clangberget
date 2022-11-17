@@ -123,8 +123,17 @@ def cursorIsDeclaration(kind):
     return False
 
 #-------------------------------------------------------------------------------
+def cursorIsDefinition(cursor):
+    if (cursor.is_definition() or
+        cursor.kind == clang.CursorKind.MACRO_DEFINITION):
+        return True
+    return False
+
+#-------------------------------------------------------------------------------
 def wanted_cursor(cursor):
     the_kind = cursor.kind
+    if cursorIsDefinition(cursor):
+        return True
     if cursorIsDeclaration(the_kind):
         return True
     if cursorIsReference(the_kind):
@@ -157,11 +166,21 @@ def get_cursorUSR(cursor):
     return None
 
 #-------------------------------------------------------------------------------
+def get_cursorName(cursor):
+    name = cursor.spelling
+    if name is not None and len(name):
+        return name
+    return "unknown name"
+
+#-------------------------------------------------------------------------------
 def handle_cursor(cursor, the_tree):
     # Get the USR and use as key
     usr = get_cursorUSR(cursor)
     if usr is None:
-        return
+        usr = get_cursorName(cursor)
+        if usr is None:
+            print(f'No usr on {cursor.kind}')
+            return
 
     # Prepare contents
     content = {}
@@ -177,7 +196,8 @@ def handle_cursor(cursor, the_tree):
 #    src_pos['linkage_kind'] = str(cursor.linkage)
 
     # A definition is also a declaration - so need to nag
-    if cursor.is_definition():
+    ref_type = 'UnKnown'
+    if cursorIsDefinition(cursor):
         ref_type = 'Definition'
         content['definition'].append(src_pos)
     elif cursorIsDeclaration(cursor.kind):
@@ -253,8 +273,10 @@ def main():
 
     clang.Config.set_library_path('C:/LLVM/14.0.1/bin')
 
-    index = clang.Index.create()
-    translation_unit = index.parse(src_file, args=[arguments])
+    exclude_local_declarations = True
+    index = clang.Index.create(exclude_local_declarations)
+    translation_unit = index.parse(src_file, args=[arguments],
+        options=clang.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
     pprint(translation_unit.cursor)
     the_tree = {}
     run(translation_unit, the_tree)
