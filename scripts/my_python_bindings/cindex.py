@@ -3162,6 +3162,9 @@ class FileInclusion(object):
         """True if the included file is the input file."""
         return self.depth == 0
 
+    def name(self):
+        return self.source.name
+
 class CompilationDatabaseError(Exception):
     """Represents an error that occurred when working with a CompilationDatabase
 
@@ -3751,7 +3754,7 @@ functionList = [
 
   ("clang_getIncludedFile",
    [Cursor],
-   c_object_p,
+   File,
    File.from_result),
 
   ("clang_getInclusions",

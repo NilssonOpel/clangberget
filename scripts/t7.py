@@ -25,8 +25,9 @@ Make a source index of a c or c++ file
 """
 USAGE_EXAMPLE = f"""
 Example:
-> {MY_NAME} -D YES=1 -I my_include_dir a.c
+> {MY_NAME} -D YES=1 -I my_include_dir --source_file a.c --out_file a.c.indx
 """
+
 #-------------------------------------------------------------------------------
 def parse_arguments():
     parser = argparse.ArgumentParser(
@@ -36,6 +37,8 @@ def parse_arguments():
         epilog=textwrap.dedent(USAGE_EXAMPLE)
     )
     add = parser.add_argument
+    add('-d', '--dependency_file', type=str,
+        help='Output file for dependencies')
     add('-D', '--define', type=str, action='append',
         help='Define a macro')
     add('-I', '--include', type=str, action='append',
@@ -43,15 +46,18 @@ def parse_arguments():
     add('-std', '--std', type=str,
         help='Language standard - to see them type\nclang(++) -std=blaj a.c')
 
-    add('--source_file', required=True, help='Input file')
-    add('--out_dir', help='Where to save result')
+    add('-s', '--source_file', required=True, help='Input file')
+    add('-o', '--output_file', help='Name of output file')
 
     options = parser.parse_args()
     if options.define is None:
         options.define = []
     if options.include is None:
         options.include = []
-
+    if options.output_file is None:
+        output_file = os.path.basename(options.source_file)
+        output_file += '.indx'
+        options.output_file = output_file
     return options
 
 #-------------------------------------------------------------------------------
@@ -74,8 +80,6 @@ def store_json_data(file, data):
         print('saving json went wrong')
 
 #-------------------------------------------------------------------------------
-#
-#-------------------------------------------------------------------------------
 def run(tu, the_tree):
     recurse(tu.cursor, the_tree)
 
@@ -87,8 +91,6 @@ def print_location(loc, iter):
     indent = ' ' * iter
     print(f'{indent}{filename}, line: {loc.line}, {loc.column}')
 
-#-------------------------------------------------------------------------------
-#
 #-------------------------------------------------------------------------------
 def get_location(loc):
     location = {}
@@ -235,8 +237,6 @@ def handle_cursor(cursor, the_tree):
         curr_content['displayname'] = displayname
 
 #-------------------------------------------------------------------------------
-#
-#-------------------------------------------------------------------------------
 def recurse(cursor, the_tree):
     if wanted_cursor(cursor):
 #        print(f'Cursor: {cursor.kind}')
@@ -252,7 +252,7 @@ def recurse(cursor, the_tree):
 
 #-------------------------------------------------------------------------------
 def make_command_line(inputs):
-    print(20*'=')
+#    print(20*'=')
     arguments = ""
     for the_define in inputs.define:
         arguments += f'-D {the_define} '
@@ -262,11 +262,31 @@ def make_command_line(inputs):
     return inputs.source_file, arguments
 
 #-------------------------------------------------------------------------------
+def generate_dependency_file(options, translation_unit):
+    src_file = options.source_file
+    the_output = options.output_file + ': '
+    the_output += '"' + src_file + '" '
+    includes = translation_unit.get_includes()
+    for include in includes:
+        # Filter on system includes ???
+        include_name = include.name()
+        if include_name == src_file:
+            continue
+        the_output += '"' +include_name + '" '
+
+    dep_file = options.dependency_file
+    with open(dep_file, 'w') as fp:
+        try:
+            fp. write(the_output)
+        except Exception as err:
+            print('Could not generate dependency file {dep_file}')
+
+#-------------------------------------------------------------------------------
 def main():
     inputs = parse_arguments()
     src_file, arguments = make_command_line(inputs)
 
-    print(f'{src_file = }\n{arguments = }')
+#    print(f'{src_file = }\n{arguments = }')
     if not os.path.exists(src_file):
         print(f'Cannot open file "{src_file}"')
         sys.exit(3)
@@ -277,18 +297,15 @@ def main():
     index = clang.Index.create(exclude_local_declarations)
     translation_unit = index.parse(src_file, args=[arguments],
         options=clang.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
-    pprint(translation_unit.cursor)
+#    pprint(translation_unit.cursor)
     the_tree = {}
     run(translation_unit, the_tree)
+    if inputs.dependency_file:
+        generate_dependency_file(inputs, translation_unit)
 
-    save_file_name = os.path.basename(src_file)
-    save_file_name += '.indx'
-    if False:
-        save_path = os.path.join(inputs.out_dir, save_file_name)
-    else:
-        save_path = save_file_name
-    store_json_data(save_path, the_tree)
-    print(f'Output saved as {save_path}')
+    save_file_name = inputs.output_file
+    store_json_data(save_file_name, the_tree)
+#    print(f'Output saved as {save_file_name}')
     return 0
 
 #-------------------------------------------------------------------------------
