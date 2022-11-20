@@ -15,4 +15,4 @@ set SRC="D:/wrk/clang-test/test/ICU/icu4c/source/samples/cal/cal.c"
 ::t7.py -I %INC0% -I %INC1% -I %INC2% -D%DEF0% -D%DEF1% -D%DEF2% -D%DEF3% -D%DEF4% -D%DEF5% %SRC%
 ::t7.py -I %INC0% -I %INC1% -I %INC2% -D %DEF4% --source_file %SRC%
 
-..\scripts\t7.py --include %INC0% --include %INC1% --include %INC2% -D%DEF0% -D%DEF1% -D%DEF2% -D%DEF3% -D%DEF4% -D%DEF5% --source_file %SRC%
+..\scripts\t7.py --include %INC0% --include %INC1% --include %INC2% -D%DEF0% -D%DEF1% -D%DEF2% -D%DEF3% -D%DEF4% -D%DEF5% --source_file %SRC% --dependency_file apa.d
