@@ -262,24 +262,50 @@ def make_command_line(inputs):
     return inputs.source_file, arguments
 
 #-------------------------------------------------------------------------------
-def generate_dependency_file(options, translation_unit):
-    src_file = options.source_file
-    the_output = options.output_file + ': '
-    the_output += '"' + src_file + '" '
-    includes = translation_unit.get_includes()
-    for include in includes:
-        # Filter on system includes ???
-        include_name = include.name()
-        if include_name == src_file:
-            continue
-        the_output += '"' +include_name + '" '
+def escape_dep(instring):
+    outstring = ""
+    instring = instring.strip()
 
+    index = 0
+    while index < len(instring):
+        ch = instring[index]
+        index += 1
+        if ch == ' ':
+            outstring += "\ "
+        elif ch == '$':
+            outstring += "$$"
+        else:
+            outstring += ch
+
+    return outstring
+
+#-------------------------------------------------------------------------------
+def add_unique_clang_includes(raw_clang_includes, include_set):
+    for clang_include in raw_clang_includes:
+        # Filter on system includes ???
+        include_name = clang_include.name()
+        include_set.add(include_name)
+
+#-------------------------------------------------------------------------------
+def generate_dependency_file(options, translation_unit):
+    # The source file is included in get_includes()
+    raw_includes = translation_unit.get_includes()
+    the_inputs = set()
+    add_unique_clang_includes(raw_includes, the_inputs)
+
+    target = options.output_file
     dep_file = options.dependency_file
     with open(dep_file, 'w') as fp:
         try:
-            fp. write(the_output)
+            output = escape_dep(target) + ':\\\n'
+            fp.write(output)
+            for the_input in the_inputs:
+                output = '  ' + escape_dep(the_input) + '\\\n'
+                fp. write(output)
+
         except Exception as err:
-            print('Could not generate dependency file {dep_file}')
+            print(f'Could not generate dependency file {dep_file}')
+            print(f'{err = }')
 
 #-------------------------------------------------------------------------------
 def main():

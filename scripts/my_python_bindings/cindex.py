@@ -1324,6 +1324,9 @@ CursorKind.OMP_TARGET_SIMD_DIRECTIVE = CursorKind(270, 'Omp_Target_Simd_Directiv
 # OpenMP teams distribute directive.
 CursorKind.OMP_TEAMS_DISTRIBUTE_DIRECTIVE = CursorKind(271, 'Omp_Teams_Distribute_Directive')
 
+# C++2a std::bit_cast expression.
+CursorKind.BUILTINBITCASTEXPR = CursorKind(280, 'BuiltinBitCastExpr')
+
 ###
 # Other Kinds
 
