@@ -194,7 +194,10 @@ def handle_cursor(cursor, the_tree):
     src_pos = {}
     src_pos['location'] = get_location(cursor.location)
     src_pos['cursor']  = f'{cursor.kind}'
-    src_pos['storage_class'] = str(cursor.storage_class)
+    try:
+        src_pos['storage_class'] = str(cursor.storage_class)
+    except Exception as err:
+        src_pos['storage_class'] = 'Threw an exception!'
 #    src_pos['linkage_kind'] = str(cursor.linkage)
 
     # A definition is also a declaration - so need to nag
