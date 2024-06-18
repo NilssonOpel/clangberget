@@ -1334,7 +1334,7 @@ CursorKind.BUILTINBITCASTEXPR = CursorKind(280, 'BuiltinBitCastExpr')
 #
 # The translation unit cursor exists primarily to act as the root cursor for
 # traversing the contents of a translation unit.
-CursorKind.TRANSLATION_UNIT = CursorKind(300, 'Translation_Unit')
+CursorKind.TRANSLATION_UNIT = CursorKind(350, 'Translation_Unit')
 
 ###
 # Attributes
@@ -1387,6 +1387,8 @@ CursorKind.TYPE_ALIAS_TEMPLATE_DECL = CursorKind(601, 'Type_Alias_Template_Decl'
 CursorKind.STATIC_ASSERT = CursorKind(602, 'Static_Assert')
 # A friend declaration
 CursorKind.FRIEND_DECL = CursorKind(603, 'Friend_Decl')
+# A concept declaration
+CursorKind.FRIEND_DECL = CursorKind(604, 'Concept_Decl')
 
 # A code completion overload candidate.
 CursorKind.OVERLOAD_CANDIDATE = CursorKind(700, 'Overload_Candidate')
@@ -1407,6 +1409,11 @@ TemplateArgumentKind.TYPE = TemplateArgumentKind(1)
 TemplateArgumentKind.DECLARATION = TemplateArgumentKind(2)
 TemplateArgumentKind.NULLPTR = TemplateArgumentKind(3)
 TemplateArgumentKind.INTEGRAL = TemplateArgumentKind(4)
+TemplateArgumentKind.TEMPLATE = TemplateArgumentKind(5)
+TemplateArgumentKind.TEMPLATEEXPANSION = TemplateArgumentKind(6)
+TemplateArgumentKind.EXPRESSION = TemplateArgumentKind(7)
+TemplateArgumentKind.PACK = TemplateArgumentKind(8)
+TemplateArgumentKind.INVALID = TemplateArgumentKind(9)
 
 ### Exception Specification Kinds ###
 class ExceptionSpecificationKind(BaseEnumeration):

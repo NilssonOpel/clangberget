@@ -320,7 +320,7 @@ def main():
         print(f'Cannot open file "{src_file}"')
         sys.exit(3)
 
-    clang.Config.set_library_path('C:/LLVM/14.0.1/bin')
+    clang.Config.set_library_path('C:/LLVM/18.1.7/bin')
 
     exclude_local_declarations = True
     index = clang.Index.create(exclude_local_declarations)
